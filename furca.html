@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Furca | The Specialty Referral Operating System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,100..900,0..100&family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette: Deep Organic Precision */
+            --bg-deep: #030a08;
+            --bg-surface: #0a1f1a;
+            --bg-glass: rgba(10, 31, 26, 0.4);
+            
+            --text-primary: #f0f4f2;
+            --text-secondary: #8c9e96;
+            --text-tertiary: #5c6b65;
+            
+            --accent-acid: #d4ff00;
+            --accent-acid-dim: rgba(212, 255, 0, 0.1);
+            --accent-teal: #2dd4bf;
+            
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-highlight: rgba(255, 255, 255, 0.15);
+            
+            --font-display: 'Fraunces', serif;
+            --font-tech: 'Archivo', sans-serif;
+            
+            --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: none; /* Custom cursor */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-tech);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Noise Texture */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Cursor */
+        .cursor-dot, .cursor-circle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-acid);
+        }
+        .cursor-circle {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--accent-acid);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            opacity: 0.5;
+        }
+        body:hover .cursor-circle {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 4vw;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 4vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            transition: all 0.5s var(--ease-fluid);
+        }
+        header.scrolled {
+            background: rgba(3, 10, 8, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 1rem 4vw;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .logo-mark {
+            width: 14px;
+            height: 14px;
+            background: var(--accent-acid);
+            transform: rotate(45deg);
+        }
+
+        nav {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+        .nav-cta {
+            padding: 0.6rem 1.25rem;
+            border: 1px solid var(--border-highlight);
+            border-radius: 4px;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+        .nav-cta:hover {
+            border-color: var(--accent-acid);
+            color: var(--accent-acid);
+        }
+
+        /* Media Placeholders */
+        .media-placeholder {
+            width: 100%;
+            background: var(--bg-surface);
+            border: 1px dashed var(--border-highlight);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .media-placeholder::after {
+            content: 'UI PREVIEW';
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--text-tertiary);
+            z-index: 2;
+        }
+
+        .media-placeholder-large {
+            height: 500px;
+            margin-top: 4rem;
+            border: 1px solid var(--border-subtle);
+            background: linear-gradient(180deg, rgba(12, 38, 32, 0.4) 0%, rgba(3, 10, 8, 0.8) 100%);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .media-placeholder-bento {
+            height: 200px;
+            margin-top: 1.5rem;
+            border-color: var(--border-subtle);
+            background: rgba(0,0,0,0.2);
+        }
+
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 8rem;
+            padding-bottom: 4rem;
+            position: relative;
+        }
+        
+        .hero-label {
+            font-family: var(--font-tech);
+            color: var(--accent-acid);
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            display: inline-block;
+            opacity: 0;
+            animation: fadeIn 0.8s var(--ease-fluid) forwards;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3.5rem, 8vw, 7.5rem);
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+        
+        .hero h1 span {
+            display: block;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: slideUp 1s var(--ease-fluid) forwards;
+        }
+
+        .hero-desc {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            line-height: 1.7;
+            opacity: 0;
+            animation: fadeIn 1s var(--ease-fluid) forwards 0.8s;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.5rem;
+            opacity: 0;
+            animation: fadeIn 1s var(--ease-fluid) forwards 1s;
+        }
+
+        .btn-primary {
+            background: var(--accent-acid);
+            color: var(--bg-deep);
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            border: none;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s var(--ease-fluid);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            border: 1px solid var(--border-highlight);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            transition: all 0.3s;
+        }
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+        }
+
+        /* Stats Strip */
+        .stats-strip {
+            display: flex;
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            margin: 6rem 0;
+        }
+        .stat-item {
+            flex: 1;
+            padding: 2rem;
+            border-right: 1px solid var(--border-subtle);
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-val {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 8rem 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .problem-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+        .problem-stat {
+            font-size: 5rem;
+            font-weight: 300;
+            color: var(--accent-acid);
+            line-height: 1;
+            margin-bottom: 1rem;
+            font-family: var(--font-display);
+        }
+        .problem-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .problem-list {
+            list-style: none;
+        }
+        .problem-list li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        .problem-list li::before {
+            content: '×';
+            color: #ff4d4d;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Bento Grid */
+        .features-section {
+            padding: 8rem 0;
+        }
+        .section-header {
+            margin-bottom: 4rem;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, minmax(300px, auto));
+            gap: 1.5rem;
+        }
+
+        .bento-item {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            padding: 2.5rem;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s var(--ease-fluid);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .bento-item:hover {
+            border-color: var(--border-highlight);
+            transform: translateY(-4px);
+            background: linear-gradient(to bottom right, var(--bg-surface), #0e2b24);
+        }
+
+        .bento-large {
+            grid-column: span 2;
+        }
+        .bento-tall {
+            grid-row: span 2;
+        }
+
+        .bento-icon {
+            font-size: 2rem;
+            color: var(--accent-acid);
+            margin-bottom: 1.5rem;
+        }
+        .bento-title {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+        .bento-desc {
+            color: var(--text-secondary);
+            font-weight: 300;
+            font-size: 1rem;
+        }
+        .bento-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+        .bento-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .bento-list li::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--accent-acid);
+            border-radius: 50%;
+        }
+
+        /* Integration Scroller */
+        .marquee-section {
+            padding: 6rem 0;
+            overflow: hidden;
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--bg-glass);
+        }
+        .marquee-content {
+            display: flex;
+            gap: 4rem;
+            animation: marquee 30s linear infinite;
+            width: max-content;
+        }
+        .partner-logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--text-tertiary);
+            opacity: 0.7;
+        }
+
+        /* Impact Section */
+        .impact-section {
+            padding: 10rem 0;
+            background: linear-gradient(to bottom, var(--bg-deep), var(--bg-surface));
+        }
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem;
+            text-align: center;
+        }
+        .impact-card h3 {
+            font-size: 4rem;
+            color: var(--accent-teal);
+            margin-bottom: 1rem;
+            font-family: var(--font-display);
+        }
+        .impact-card p {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        /* Why Furca */
+        .why-section {
+            padding: 8rem 0;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .why-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            font-family: var(--font-display);
+        }
+        .why-text {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 10rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 6vw, 5rem);
+            margin-bottom: 2rem;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Keyframes */
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes marquee {
+            to { transform: translateX(-50%); }
+        }
+
+        /* Utils */
+        .text-gradient {
+            background: linear-gradient(90deg, var(--accent-acid), var(--accent-teal));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-circle"></div>
+
+    <header>
+        <a href="#" class="logo">
+            <div class="logo-mark"></div>
+            FURCA
+        </a>
+        <nav>
+            <a href="#" class="nav-link">Platform</a>
+            <a href="#" class="nav-link">Integrations</a>
+            <a href="#" class="nav-link">Resources</a>
+            <a href="#" class="nav-cta">Schedule Demo</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <span class="hero-label">The Embedded Referral OS</span>
+            <h1>
+                <span style="animation-delay: 0.1s">Zero Revenue Leakage.</span>
+                <span style="animation-delay: 0.2s; font-style: italic; color: var(--accent-teal);">Total</span>
+                <span style="animation-delay: 0.3s">Referral Control.</span>
+            </h1>
+            <p class="hero-desc">
+                Furca is the first specialty-referral system built <strong>directly inside Dentrix Ascend</strong>. 
+                Eliminate operational bottlenecks, automate follow-ups, and stop losing patients across your DSO network.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary">Schedule Demo</button>
+                <button class="btn-secondary">View ROI Analysis</button>
+            </div>
+            
+            <!-- Hero Media Placeholder -->
+            <div class="media-placeholder media-placeholder-large reveal-on-scroll" style="animation-delay: 1.2s; border: none; background: transparent;">
+                <video src="DemoIntro.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"></video>
+            </div>
+        </section>
+
+        <div class="stats-strip reveal-on-scroll">
+            <div class="stat-item">
+                <span class="stat-val">+40%</span>
+                <span class="stat-label">Case Acceptance</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val">30 min</span>
+                <span class="stat-label">Rapid Onboarding</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val">100%</span>
+                <span class="stat-label">Embedded Workflow</span>
+            </div>
+        </div>
+
+        <section class="problem-section reveal-on-scroll">
+            <div>
+                <div class="problem-stat">40%</div>
+                <h2 class="problem-title">of referrals never convert.</h2>
+                <p class="problem-desc">
+                    In multi-location DSOs, specialty referrals slip through the cracks due to manual entry, forgotten follow-ups, and disconnected systems.
+                </p>
+            </div>
+            <div>
+                <ul class="problem-list">
+                    <li>Lost production for specialists</li>
+                    <li>Poor patient continuity of care</li>
+                    <li>Zero visibility for regional managers</li>
+                    <li>Inconsistent workflows across locations</li>
+                    <li>Lack of accountability</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="section-header reveal-on-scroll">
+                <span class="hero-label">The Solution</span>
+                <h2 class="section-title">Automated. Embedded. Intelligent.</h2>
+            </div>
+            
+            <div class="bento-grid">
+                <div class="bento-item bento-large reveal-on-scroll">
+                    <div class="bento-icon">⟡</div>
+                    <h3 class="bento-title">Embedded in Dentrix Ascend</h3>
+                    <p class="bento-desc">
+                        Stop asking staff to "learn new software." Furca lives inside the patient chart they already use.
+                    </p>
+                    <div style="display: flex; gap: 2rem;">
+                        <ul class="bento-list">
+                            <li>Automatic data prefill</li>
+                            <li>One-click appointment linking</li>
+                            <li>Real-time status tracking</li>
+                        </ul>
+                         <!-- Embedded UI Placeholder -->
+                        <div class="media-placeholder media-placeholder-bento" style="flex: 1; margin-top: 0; height: auto; min-height: 150px;"></div>
+                    </div>
+                </div>
+                <div class="bento-item reveal-on-scroll">
+                    <div class="bento-icon">⚡</div>
+                    <h3 class="bento-title">Instant Alerts</h3>
+                    <p class="bento-desc">
+                        Automatic notifications when a referral is created without an appointment. Catch revenue leakage before it happens.
+                    </p>
+                </div>
+                <div class="bento-item bento-tall reveal-on-scroll">
+                    <div class="bento-icon">📊</div>
+                    <h3 class="bento-title">Centralized Command</h3>
+                    <p class="bento-desc">
+                        Audit-ready reporting for compliance & leadership.
+                        Visualize referral conversion, team performance, and revenue opportunities across every location.
+                    </p>
+                    <!-- Dashboard UI Placeholder -->
+                    <div class="media-placeholder media-placeholder-bento" style="flex: 1;"></div>
+                </div>
+                <div class="bento-item bento-large reveal-on-scroll">
+                    <div class="bento-icon">🛡</div>
+                    <h3 class="bento-title">Smart Outreach</h3>
+                    <p class="bento-desc">
+                        Built-in call logging and follow-up automation ensure no patient is left behind.
+                        Manage unscheduled and returning referrals from a single dashboard.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="impact-section reveal-on-scroll">
+            <div class="container">
+                <span class="hero-label" style="display:block; text-align:center; margin-bottom: 2rem;">Measurable Impact</span>
+                <h2 class="section-title" style="text-align: center; margin-bottom: 4rem;">Why DSOs Choose Furca</h2>
+                <div class="impact-grid">
+                    <div class="impact-card">
+                        <h3>+40%</h3>
+                        <p>Increase in specialty case acceptance</p>
+                    </div>
+                    <div class="impact-card">
+                        <h3>Zero</h3>
+                        <p>Additional labor required</p>
+                    </div>
+                    <div class="impact-card">
+                        <h3>100%</h3>
+                        <p>Referral Visibility</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="why-section reveal-on-scroll">
+            <h2 class="why-title">No "New Software" Fatigue</h2>
+            <p class="why-text">
+                Furca doesn't ask your staff to change their behavior. 
+                It surfaces exactly what they need to do, exactly when they need to do it—inside the PMS they already know.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 2rem;">
+                <div style="text-align: left;">
+                    <span style="color: var(--accent-acid); font-weight: bold;">✔</span> Minimal Training
+                </div>
+                <div style="text-align: left;">
+                    <span style="color: var(--accent-acid); font-weight: bold;">✔</span> Near-Instant Adoption
+                </div>
+                <div style="text-align: left;">
+                    <span style="color: var(--accent-acid); font-weight: bold;">✔</span> Single Source of Truth
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="marquee-section">
+        <div class="marquee-content">
+            <span class="partner-logo">OPEN DENTAL</span>
+            <span class="partner-logo">CURVE DENTAL</span>
+            <span class="partner-logo">PLANET DDS</span>
+            <span class="partner-logo">DENTRIX</span>
+            <span class="partner-logo">EAGLESOFT</span>
+            <!-- Repeat for seamless loop -->
+            <span class="partner-logo">OPEN DENTAL</span>
+            <span class="partner-logo">CURVE DENTAL</span>
+            <span class="partner-logo">PLANET DDS</span>
+            <span class="partner-logo">DENTRIX</span>
+            <span class="partner-logo">EAGLESOFT</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="cta-section reveal-on-scroll">
+            <h2 class="cta-title">Stop losing millions in<br>specialty revenue.</h2>
+            <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Furca solves referral leakage permanently by turning Dentrix Ascend into a fully intelligent referral engine.
+            </p>
+            <button class="btn-primary" style="padding: 1.5rem 3.5rem; font-size: 1.1rem;">Schedule Your Demo</button>
+        </section>
+    </div>
+
+    <script>
+        // Custom Cursor
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorCircle = document.querySelector('.cursor-circle');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursorDot.style.left = e.clientX + 'px';
+            cursorDot.style.top = e.clientY + 'px';
+            
+            // Add a slight delay for the circle to create a "trailing" feel
+            setTimeout(() => {
+                cursorCircle.style.left = e.clientX + 'px';
+                cursorCircle.style.top = e.clientY + 'px';
+            }, 50);
+        });
+
+        // Header Scroll Effect
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Intersection Observer for Scroll Reveals
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
